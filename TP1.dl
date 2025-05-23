@@ -1,0 +1,43 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%          CINEMA DATABASE
+%%
+%%  artists(aID, anom, nationalite)	              key: aID
+%%  films(fID, titre, realisateur, an, langue)	      key: fID
+%%  roles(fID, aID, personnage, cout)         	      key: fID, aID
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+/consult createCinema.dl
+
+1)
+/assert participer(Anom, Titre) :- artists(AID, Anom, _), films(FID, Titre, _, _, _), roles(FID, AID, _, _).
+
+2) 
+/assert rital(Nom) :- artists(_, Nom, Nationalite), (Nationalite = francaise; Nationalite = italienne).
+
+
+3)
+/assert natioLangue(Titre) :- films(_, Titre, _, _, Langue),artists(_, Nom, Langue),  participer(Nom, Titre).
+
+4)
+/assert jouent(IdFilm) :- films(IdFilm, Titre, _, _, _), participer(Anom1, Titre), participer(Anom2, Titre),  artists(IdArtiste1, Anom1, francaise), artists(IdArtiste2, Anom2, francaise), IdArtiste1 \= IdArtiste2.
+
+5)
+/assert joueseul(IdFilm) :- films(IdFilm, Titre, _, _, _), participer(Anom ,Titre),  artists(_, Anom, francaise), not jouent(IdFilm).
+
+6)
+/assert joueaucun(IdFilm) :- films(IdFilm, _, _, _, _), not jouent(IdFilm), not joueseul(IdFilm).
+
+7) 
+/assert othernatio(IdFilm) :-films(IdFilm, Titre, _, _, _), participer(Anom ,Titre), artists(_, Anom, Nationalite), (Nationalite \= francaise).
+
+/assert onlyfrench(IdFilm, Titre, Realisateur) :- films(IdFilm, Titre, Realisateur, _, _), not othernatio(IdFilm).
+
+8)
+group_by(participer(Anom, Titre),[Anom],R=count(Titre)), (R > 1).
+
+9)
+/assert persopasneo(Anom) :- roles(FID, AID, Personnage, _), artists(AID, Anom, _), films(FID, Titre, _, _, _), participer(Anom, Titre), (Personnage \= 'Neo').
+/assert soloneo(Anom) :- participer(Anom ,_), artists(_, Anom, _), not persopasneo(Anom).
+
+10)
